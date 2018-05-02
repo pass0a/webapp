@@ -1,2 +1,2 @@
-"E:/git/passoa/passoa/binary/Debug/passoa" index.js
+"E:/git/passoa/passoa/binary/Debug/passoa" ./
 pause
