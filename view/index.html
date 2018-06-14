@@ -1,599 +1,179 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<html>
     <head>
-        <title>iView project</title>
-		<meta charset="UTF-8">
-		<script src="var/vue.min.js"></script>
-		<script type="text/javascript" src="var/axios.js"></script>
-		<!-- 引入样式 -->
-		<link rel="stylesheet" href="var/iview.css">
-		<!-- 引入组件库 -->
-		<script src="var/iview.min.js"></script>
-		<script src="var/js.cookie.js"></script>
-    </head>
-    <body>
-	<style>
-		#index{
-			width: 100%;
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			left: 0;
-			text-align: center;
-		}
-		#ivu-row-flex{
-				height: 100%;
-			}
-		#index h1{
-			color: #666;
-			margin-bottom: 100px;
-		}
-		.test{
-			height: 100%;
-		}
-		.demo-spin-icon-load{
-			animation: ani-demo-spin 1s linear infinite;
-		}
-	</style>
-	<script type="text/x-template" id="workopen-template">
-		<div id="index">
-			<Row type="flex" justify="center" align="middle" class="test">
-				<Card style="width:480px">
-					<h1>Poseidon自动化测试套件</h1>
-					<!-- <Input v-model="value" disabled placeholder="测试版本，请点击选择目录按钮选择项目..." style="width: 300px"></Input></br> -->
-					<Table border :columns="columns7" :data="data6"></Table>
-					<Button type="error" style="margin-left: 8px;margin-top: 8px" @click="cancel">Cancel</Button>
-				</Card>
-				<Modal
-					v-model="msg.mode"
-					title="提示"
-					@on-ok="msgok"
-					@on-cancel="msgng">
-					<p>{{msg.text}}</p>
-				</Modal>
-			</Row>
-		</div>
-	</script>
-	<script>
-		var ginfo={
-				mode:1,
-				prjlist:[],
-				test:{
-					status:0,
-					percent:0,
-					loading:false
-				}
-			};
-		Vue.component('workopen', {
-			template: "#workopen-template",
-			data(){
-				return {
-					info:ginfo,
-					msg:{
-						mode:0,
-						text:"",
-					},
-					columns7: [
-						{
-							title: '项目名',
-							key: 'name',
-						},
-						{
-							title: 'Action',
-							key: 'action',
-							width: 150,
-							align: 'center',
-							render: (h, params) => {
-								return h('div', [
-									h('Button', {
-										props: {
-											type: 'primary',
-											size: 'small'
-										},
-										style: {
-											marginRight: '5px'
-										},
-										on: {
-											click: () => {
-												this.openPrj(this.data6[params.index].name)
-											}
-										}
-									}, '打开'),
-									h('Button', {
-										props: {
-											type: 'error',
-											size: 'small'
-										},
-										on: {
-											click: () => {
-												alert(params.index)
-											}
-										}
-									}, '删除')
-								]);
-							}
-						}
-					],
-					data6:ginfo.prjlist,
-					value:"",
-				};
-			},
-			methods: {
-				submit(){
-					
-				},
-				openPrj(name){
-					Cookies.set('prj_name', name, { expires: 1 });
-					Cookies.set('mode', 2, { expires: 1 });
-					this.info.mode=2;
-				},
-				cancel(){
-					this.info.mode=1;
-				},
-				msgok(){
-					if(this.value){
-						this.info.mode=2;
-					}else{
-						this.info.mode=3;
-					}
-				},
-				msgng(){
-					if(this.value){
-						this.info.mode=3;
-					}else{
-						this.info.mode=1;
-					}
-				}
-			}
-		});
-	</script>
-	<script type="text/x-template" id="worknew-template">
-		<div id="index">
-			<Row type="flex" justify="center" align="middle" class="test">
-				<Card style="width:480px">
-					<h1>Poseidon自动化测试套件</h1>
-					<!-- <Input v-model="value" disabled placeholder="测试版本，请点击选择目录按钮选择项目..." style="width: 300px"></Input></br> -->
-						<Form :model="formItem" :label-width="80">
-							<FormItem label="项目名称：">
-								<Input v-model="formItem.prjname" placeholder="请输入项目名称..."></Input>
-							</FormItem>
-							<FormItem>
-								<Button type="primary" @click="submit">创建</Button>
-								<Button type="ghost" style="margin-left: 8px" @click="cancel">取消</Button>
-							</FormItem>
-						</Form>  
-					
-				</Card>
-				<Modal
-					v-model="msg.mode"
-					title="提示"
-					@on-ok="msgok"
-					@on-cancel="msgng">
-					<p>{{msg.text}}</p>
-				</Modal>
-			</Row>
-		</div>		
-	</script>
-	<script type="text/x-template" id="welcome-template">
-		<div id="index">
-			<Row type="flex" justify="center" align="middle" class="test">
-				<Card style="width:480px">
-					<h1>Poseidon自动化测试套件</h1>
-					<!-- <Input v-model="value" disabled placeholder="测试版本，请点击选择目录按钮选择项目..." style="width: 300px"></Input></br> -->
-					<Button type="primary" @click="newWork" >创建项目</Button>  
-					<Button type="primary" @click="open" >打开项目</Button>  
-					<div style="text-align:center">
-						<img src="var/img/logo.png">
-					</div>
-				</Card>
-			</Row>
-		</div>		
-	</script>
-	<script type="text/x-template" id="work-type">
-		<div id="index">
-			<Row type="flex" justify="center" align="middle" class="test">
-				<div>
-					<h1>Poseidon自动化测试套件</h1><br/>
-					<p>当前工作目录为：{{Cookies.get("prj_name")}}</p>
-					<Button type="primary" @click="edit">编辑用例</Button>  
-					<Button type="primary" @click="pick">截取图像</Button>  
-					<Button type="primary" @click="test">运行测试</Button>  
-					<Button type="primary" @click="report">查看报告</Button>
-					<Button type="primary" @click="exit">退出项目</Button>  
-					<div style="text-align:center">
-						<img src="var/img/logo.png">
-					</div>
-				</div>	
-			</Row>
-		</div>		
-	</script>
-	<script type="text/x-template" id="casetest-type">
-		<div id="index">
-			<Row type="flex" justify="center" align="middle" class="test">	
-				<div>
-					<h1>Poseidon自动化测试套件</h1><br/>
-					<i-circle :percent="info.test.percent" :stroke-color="color">
-						<Icon v-if="info.test.percent == 100" type="ios-checkmark-empty" size="60" style="color:#5cb85c"></Icon>
-						<span v-else style="font-size:24px">{{ info.test.percent }}%</span>
-					</i-circle>
-					<span v-if="info.test.status=='completed'">
-						<Button type="success" @click="report">查看报表</Button>
-						<Button type="warning" @click="exit">不看了，下次看</Button>		
-					</span>
-					<span v-else>
-						<ul v-if="testflag==0">
-							<Button type="error" icon="pause" @click="stopTest">暂停</Button>
-						</ul>
-						<ul v-else>
-							<Button type="success" icon="play" @click="continueTest">继续</Button>
-							<Button type="primary" icon="eye" @click="report">查看报表</Button>
-							<Button type="warning" icon="arrow-return-left" @click="exit">退出</Button>
-						</ul>
-					</span>
-					<div style="text-align:center">
-						<img src="var/img/logo.png">
-					</div>
-				</div>
-			</Row>
-		</div>		
-	</script>
-	<script type="text/x-template" id="continuetest-type">
-		<div id="index">
-			<Row type="flex" justify="center" align="middle" class="test">
-				<div>
-					<h1>Poseidon自动化测试套件</h1><br/>
-					<h3>是否继续运行测试?</h3><br/>
-					<span>
-						<Button type="success" icon="play" @click="continueTest">继续运行</Button>
-						<Button type="warning" icon="refresh" @click="newTest">重新运行</Button>
-						<Button type="primary" icon="arrow-return-left" @click="exit">退出</Button>
-					</span>
-					<div style="text-align:center">
-						<img src="var/img/logo.png">
-					</div>
-				</div>
-			</Row>
-		</div>
-	</script>
-	<script>
-	// Let us open a web socket
-	var ws = new WebSocket("ws://127.0.0.1:2347");
-	ws.onopen = function()
-	{
-	};
-	ws.onmessage = function(frm){
-		var str=frm.data;
-		var obj=JSON.parse(str);
-		if(obj.tested==undefined){
-			obj.tested=0;
-		}
-		ginfo.test.percent=parseInt(((obj.tested+1)*100)/obj.total);
-		ginfo.test.status=obj.sts;
-		if(obj.sts!=""){
-			ginfo.test.loading=false;
-		}
-	};
-	ws.onclose = function()
-	{ 
-		// websocket is closed.
-		window.opener=null;
-		window.open('','_self');
-		window.close();
-	};
-	Vue.component('continuetest', {
-    	template: '#continuetest-type',
-		data(){
-			return {
-				info:ginfo
-			};
-		},
-		methods: {
-			continueTest(){
-				this.info.test.percent=0;
-				this.info.test.status="runing";
-				var that=this;
-				axios.post('/logic', {
-					type: 'test',
-					title:"自动测试",
-					devname:"lowDa",
-					prjname:Cookies.get("prj_name"),
-				})
-				.then(function(response){
-					var obj=response.data;
-					if(!obj.status){
-						that.info.mode=5;
-					};
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			},
-			newTest(){
-				var that=this;
-				axios.post('/logic', {
-					type: 'clearInfo',
-					prjname:Cookies.get("prj_name"),
-				})
-				.then(function(response){
-					if(response.status==200){
-						that.continueTest();
-					};
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			},
-			exit(){
-				this.info.test.percent=0;
-				this.info.test.status="runing";
-				this.info.mode=2;
-				Cookies.set('mode', 2, { expires: 1 });
-			}
-		}
-	});
-	Vue.component('testtype', {
-    	template: '#casetest-type',
-		data(){
-			return {
-				info:ginfo,
-				testflag:0
-			};
-		},
-		created(){
-			
-		},
-		computed: {
-            color () {
-                let color = '#2db7f5';
-                if (this.info.test.percent == 100) {
-                    color = '#5cb85c';
-                }
-                return color;
+        <title>WebGL test</title>
+        <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+ 
+        <script id="shader-vs" type="x-shader/x-vertex">
+            attribute vec3 position;
+             
+            uniform mat4 mv;
+            uniform mat4 proj;
+ 
+            void main()
+            {
+                gl_Position = proj * mv * vec4(position, 1.0);
             }
-        },
-		methods: {
-			report(){
-				window.location.href="report.html";
-			},
-			exit(){
-				this.info.test.percent=0;
-				this.info.test.status="runing";
-				this.info.mode=2;
-				Cookies.set('mode', 2, { expires: 1 });
-			},
-			stopTest(){
-				this.testflag=1;
-				ginfo.test.loading=true;
-				axios.post('/logic',{
-					type: 'stop'
-				})
-				.then(function(response){
-				})
-				.catch(function(err){
-					console.log(err);
-				});
-			},
-			continueTest(){
-				this.testflag=0;
-				this.info.test.percent=0;
-				this.info.test.status="runing";
-				var that=this;
-				axios.post('/logic', {
-					type: 'test',
-					title:"自动测试",
-					devname:"lowDa",
-					prjname:Cookies.get("prj_name"),
-				})
-				.then(function(response){
-					var obj=response.data;
-					if(!obj.status){
-						that.info.mode=5;
-					};
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			}
-		}
-    });
-	</script>
-	<div id="app" class="demo-spin-article">
-		<transition name="fade" mode="out-in">
-			<welcome v-bind:info="info" v-if="info.mode==1"></welcome>
-			<worktype v-bind:info="info" v-if="info.mode==2"></worktype>
-			<worknew v-bind:info="info" v-if="info.mode==3"></worknew>
-			<workopen v-bind:info="info" v-if="info.mode==4"></workopen>
-			<testtype v-bind:info="info" v-if="info.mode==5"></testtype>
-			<continuetest v-bind:info="info" v-if="info.mode==6"></continuetest>
-		</transition>
-		<Spin size="large" fix v-if="ginfo.test.loading">
-			<Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-            <div>正在等待执行中的步骤完成后停止...</div>
-		</Spin>
-	</div>
-	<script>
-		
-	Vue.component('worktype', {
-    	template: '#work-type',
-		data(){
-			return {
-				info:ginfo,
-				value:""
-			};
-		},
-		methods: {
-			edit(){
-				window.location.href="cases.html";
-			},
-			pick(){
-				axios.post('/logic', {
-					type: 'pick',
-					title:"自动截图",
-					devname:"lowDa",
-					prjname:Cookies.get("prj_name"),
-				})
-				.then(function(response){
-					var obj=response.data;
-					console.log(obj.status);
-					
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			},
-			test(){
-				var that=this;
-				axios.post('/get', {
-					type: 'read',
-					file: Cookies.get('prj_name')+'/stopinfo.json',
-				})
-				.then(function(response) {
-					console.log(response.data);
-					if(response.data.idx!=undefined){
-						that.info.mode=6;
-					}else{
-						that.startTest();
-					}
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-				
-			},
-			startTest(){
-				var that=this;
-				axios.post('/logic', {
-					type: 'test',
-					title:"自动测试",
-					devname:"lowDa",
-					prjname:Cookies.get("prj_name"),
-				})
-				.then(function(response){
-					var obj=response.data;
-					if(!obj.status){
-						that.info.mode=5;
-					};
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			},
-			report(){
-				window.location.href="report.html";
-			},
-			exit(){
-				this.info.mode=1;
-				Cookies.set('mode', 1, { expires: 1 });
-			}
-		}
-    });
-	Vue.component('welcome', {
-    	template: '#welcome-template',
-		data(){
-			return {info:ginfo,value:"",selectbtn:false,startbtn:true};
-		},
-		methods: {
-			handleUpload (file) {
-                console.info(file.name+":"+typeof file);
-                return false;
-            },
-			newWork(){
-				this.info.mode=3;
-			},
-			open(){
-				// var path=this.value.substr(0,this.value.lastIndexOf("\\"));
-				// console.info(path);
-				// Cookies.set('prj_file', this.value, { expires: 1 });
-				// Cookies.set('prj_dir', path, { expires: 1 });
-				// Cookies.set('mode', 2, { expires: 1 });
-				that=this;
-				axios.post('/logic', {
-					type: 'openWork',
-				})
-				.then(function(response){
-					that.info.prjlist=response.data;
-					if(that.info.prjlist.length){
-						that.info.mode=4;
-					}else{
-					}
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-				
-			}
-		}
-	});
-	Vue.component('worknew', {
-    	template: "#worknew-template",
-		data(){
-			return {
-				info:ginfo,
-				msg:{
-					mode:0,
-					text:"",
-				},
-				formItem:{
-					prjname:"",
-				},
-				value:"",
-			};
-		},
-		methods: {
-			submit(){
-				var that=this;
-				this.selectbtn=true;
-				axios.post('/logic', {
-					type: 'newWork',
-					prjname:this.formItem.prjname,
-				})
-				.then(function(response){
-					that.value=response.data;
-					if(that.value){
-						that.msg.text="成功创建项目，是否开始工作？";
-					}else{
-						that.msg.text="创建项目失败，是否返回创建页面？";
-					}
-					that.msg.mode=1;
-					console.log(that.value);
-				})
-				.catch(function (error) {
-					console.log(error);
-				});
-			},
-			cancel(){
-				this.info.mode=1;
-			},
-			msgok(){
-				if(this.value){
-					this.info.mode=2;
-				}else{
-					this.info.mode=3;
-				}
-			},
-			msgng(){
-				if(this.value){
-					this.info.mode=3;
-				}else{
-					this.info.mode=1;
-				}
-			}
-		}
-	});
-	new Vue({
-        el: '#app',
-        data:{
-			info:ginfo
-		},
-		created: function () {
-			var mode=Cookies.get("mode");
-			if(!mode){
-				this.info.mode=1;
-			}else{
-				this.info.mode=mode;
-			}
-		}
-    })
-	</script>
+        </script>
+        <script id="shader-fs" type="x-shader/x-fragment">
+            void main()
+            {
+                gl_FragColor = vec4(0.8, 0.8, 0.0, 1.0);
+            }
+        </script>
+ 
+        <script type="text/javascript">          
+            // Initialises WebGL and creates the 3D scene.
+            function loadScene()
+            {
+                var canvas = document.getElementById("webGLCanvas");
+                if (!canvas.getContext)
+                {
+                    alert("There's no canvas available.");
+                    return;
+                }
+ 
+                var gl = canvas.getContext("experimental-webgl");
+                if (!gl)
+                {
+                    alert("There's no WebGL context available.");
+                    return;
+                }
+ 
+                var vendor_info = document.getElementById("vendor_info");
+                var renderer_info = document.getElementById("renderer_info");
+                var version_info = document.getElementById("version_info");
+                var ext_info = document.getElementById("ext_info");
+                vendor_info.innerHTML = gl.getParameter(gl.VENDOR);
+                renderer_info.innerHTML = gl.getParameter(gl.RENDERER);
+                version_info.innerHTML = gl.getParameter(gl.VERSION);
+                var exts = gl.getSupportedExtensions();
+                var s = "";
+                for (index in exts)
+                {
+                    s += exts[index] + "<br />";
+                }
+                ext_info.innerHTML = s;
+ 
+                 
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                 
+                var vertexShaderScript = document.getElementById("shader-vs");
+                var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+                gl.shaderSource(vertexShader, vertexShaderScript.text);
+                gl.compileShader(vertexShader);
+                if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS))
+                {
+                    alert("Unable to compile the vertex shader");
+                    gl.deleteShader(vertexShader);
+                    return;
+                }
+                 
+                var fragmentShaderScript = document.getElementById("shader-fs");
+                var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+                gl.shaderSource(fragmentShader, fragmentShaderScript.text);
+                gl.compileShader(fragmentShader);
+                if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS))
+                {
+                    alert("Unable to compile the fragment shader");
+                    gl.deleteShader(fragmentShader);
+                    return;
+                }
+ 
+                gl.program = gl.createProgram();
+                gl.attachShader(gl.program, vertexShader);
+                gl.attachShader(gl.program, fragmentShader);
+                gl.linkProgram(gl.program);
+                if (!gl.getProgramParameter(gl.program, gl.LINK_STATUS))
+                {
+                    alert("Unable to link shaders");
+                    gl.deleteProgram(gl.program);
+                    gl.deleteProgram(vertexShader);
+                    gl.deleteProgram(fragmentShader);
+                    return;
+                }
+ 
+                gl.clearColor(0.2, 0.4, 0.6, 1.0);
+                gl.clearDepth(1.0);
+                gl.enable(gl.DEPTH_TEST);
+                gl.depthFunc(gl.LEQUAL);
+                 
+                var vertexBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+                var vertices = new Float32Array([
+                    0.0,   1.0, 1.0,
+                    -1.0, -1.0, 1.0,
+                    1.0,  -1.0, 1.0
+                ]);
+     
+                gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+                 
+                gl.useProgram(gl.program);
+                var vertexPosition = gl.getAttribLocation(gl.program, "position");
+                gl.enableVertexAttribArray(vertexPosition);
+                gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+ 
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                 
+                var fov = 90.0;
+                var aspect = canvas.width / canvas.height;
+                var nearPlane = 1.0;
+                var farPlane = 100.0;
+                var top = nearPlane * Math.tan(fov / 2 * Math.PI / 180);
+                var bottom = -top;
+                var right = top * aspect;
+                var left = -right;
+ 
+                var a = (right + left) / (right - left);
+                var b = (top + bottom) / (top - bottom);
+                var c = (farPlane + nearPlane) / (farPlane - nearPlane);
+                var d = (2 * farPlane * nearPlane) / (farPlane - nearPlane);
+                var x = (2 * nearPlane) / (right - left);
+                var y = (2 * nearPlane) / (top - bottom);
+                var perspectiveMatrix = new Float32Array([
+                    x, 0, a, 0,
+                    0, y, b, 0,
+                    0, 0, c, d,
+                    0, 0, -1, 0
+                ]);
+                 
+                var modelViewMatrix = new Float32Array([
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1
+                ]);
+ 
+                gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "proj"), false, perspectiveMatrix);
+                gl.uniformMatrix4fv(gl.getUniformLocation(gl.program, "mv"), false, modelViewMatrix);
+ 
+                gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 3);
+            }
+        </script>
+    </head>
+     
+    <body onload="loadScene()">
+        <h1>WebGL Test</h1>
+        <h3>Vendor</h3>
+        <p id="vendor_info"></p>
+        <h3>Renderer</h3>
+        <p id="renderer_info"></p>
+        <h3>Version</h3>
+        <p id="version_info"></p>
+        <h3>Extensions</h3>
+        <p id="ext_info"></p>
+        <h3>Rendering</h3>
+        <canvas id="webGLCanvas" width="640" height="480"></canvas>
+         
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-16460301-1']);
+  _gaq.push(['_trackPageview']);
+ 
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
     </body>
 </html>

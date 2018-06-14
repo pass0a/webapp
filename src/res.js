@@ -27,14 +27,20 @@ try {
                     pn=formatPath(process.cwd()+"/view",info.pathname);
                     break;
             }
-            fs.readFile(pn, function(err, data){
-				if (err) {
-                    res.writeHead(404, {"Content-Type": "text/html"});
+			var r=new fs.ReadStream(pn);
+            r.on("error",function(){
+				res.writeHead(404, {"Content-Type": "text/html"});
                     res.end("<h1>404 Not Found</h1>");
-                } else {
-                    res.writeHead(200, {"Content-Type": mime(pn),"Content-Length":data.length});
-                    res.end(data);
-                }
+			})	
+			r.on("open",function(){
+				res.writeHead(200, {"Content-Type": mime(pn),"Content-Length":data.length});
+			});
+			r.on("data",function(data){
+				res.send(data);
+			});
+			r.on("close",function(){
+				res.end();
+			})
             });
         }
         module.exports = res;
